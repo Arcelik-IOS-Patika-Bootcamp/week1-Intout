@@ -4,17 +4,18 @@ import Foundation
 
 class Game: ObservableObject{
     
-    
     @Published var numberOfDoor: Int
     @Published var indexWithPrize: Int
     @Published var indexForDecision: Int?
     @Published var gameState: GameState
     @Published var selectedIndex: Int?
+    @Published var playerState: PlayerState
     
     init(numberOfDoor: Int){
         self.numberOfDoor = numberOfDoor
         self.gameState = .begining
         self.indexWithPrize = Int.random(in: 0..<numberOfDoor)
+        self.playerState = .notDetermined
     }
     
     func selectIndexForDecision(){
@@ -36,6 +37,7 @@ class Game: ObservableObject{
         self.indexForDecision = nil
         self.selectedIndex = nil
         self.gameState = .begining
+        self.playerState = .notDetermined
     }
     
 }
@@ -46,6 +48,12 @@ enum GameState{
 
 enum DoorState{
     case opened, closed
+}
+
+enum PlayerState: String{
+    case notDetermined
+    case win = "You win the prize!"
+    case lose = "You are now a proud owner of a duck!"
 }
 
 struct DoorObject: View{
@@ -102,7 +110,6 @@ struct DoorObject: View{
 struct MainView: View{
     
     @ObservedObject var game: Game = Game(numberOfDoor: 4)
-    @State var endMessage: String?
     
     var body: some View{
         
@@ -131,20 +138,12 @@ struct MainView: View{
                         
                         HStack(spacing: 50){
                             Button("Go On"){
-                                if game.selectedIndex == game.indexWithPrize{
-                                    self.endMessage = "You win the prize!"
-                                } else {
-                                    self.endMessage = "You are now a proud owner of a duck!"
-                                }
+                                self.game.playerState = game.selectedIndex == game.indexWithPrize ? .win : .lose
                                 game.gameState = .ending
                             }
                             
                             Button("Switch"){
-                                if game.indexForDecision == game.indexWithPrize{
-                                    self.endMessage = "You win the prize!"
-                                } else {
-                                    self.endMessage = "You are now a proud owner of a duck!"
-                                }
+                                self.game.playerState = game.indexForDecision == game.indexWithPrize ? .win : .lose
                                 game.gameState = .ending
                             }
                         }
@@ -152,7 +151,7 @@ struct MainView: View{
                 }
             case .ending:
                 VStack(spacing: 20){
-                    Text(self.endMessage!)
+                    Text(self.game.playerState.rawValue)
                     Button("Play Again"){
                         self.game.resetGame(numberOfDoors: 4)
                     }
