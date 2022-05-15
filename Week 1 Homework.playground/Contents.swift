@@ -126,6 +126,13 @@ struct MainView: View{
                         Text("Door \(index + 1)")
                         DoorObject(selection: $game.selectedIndex, indexForDecision: $game.indexForDecision, gameState: $game.gameState, doorIndex: index, isContainPrize: game.indexWithPrize == index)
                     }
+                    .padding(5)
+                    .background(
+                        
+                        LinearGradient(gradient: Gradient(colors: [doorHighlightColor(index: index), .white]), startPoint: .top, endPoint: .bottom)
+                            .opacity(self.doorHighlight(index: index))
+                        
+                    )
                 }
             }
             Spacer()
@@ -167,6 +174,36 @@ struct MainView: View{
                 game.selectIndexForDecision()
             }
         }
+    }
+    func doorHighlightColor(index: Int) -> Color{
+        switch (self.game.gameState){
+        case .begining:
+            return .white
+        case .decisioning:
+            return .orange
+        case .ending:
+            if self.game.indexWithPrize == index{
+                return .green
+            } else if self.game.selectedIndex == index{
+                return .red
+            }
+        }
+        return .white
+    }
+    func doorHighlight(index: Int) -> Double{
+        switch (self.game.gameState){
+        case .begining:
+            break
+        case .decisioning:
+            if self.game.selectedIndex == index{
+                return 1
+            }
+        case .ending:
+            if self.game.indexWithPrize == index || self.game.selectedIndex == index{
+                return 1
+            }
+        }
+        return 0
     }
 }
 
