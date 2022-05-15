@@ -21,18 +21,11 @@ class Game: ObservableObject{
     func selectIndexForDecision(){
         if self.selectedIndex == self.indexWithPrize{
             var indexForDecision: Int = Int.random(in: 0..<self.numberOfDoor)
-            if indexForDecision == self.indexWithPrize{
-                if indexForDecision == 0{
-                    self.indexForDecision = indexForDecision + 1
-                    return
-                } else if indexForDecision == self.numberOfDoor - 1{
-                    self.indexForDecision = indexForDecision - 1
-                    return
-                } else {
-                    self.indexForDecision = indexForDecision
-                    return
-                }
+            while indexForDecision == self.indexWithPrize{
+                indexForDecision = Int.random(in: 0..<self.numberOfDoor)
             }
+            self.indexForDecision = indexForDecision
+            return
         }
         self.indexForDecision = self.selectedIndex
         return
@@ -53,6 +46,7 @@ struct DoorObject: View{
     
     @State var currentState: DoorState = .closed
     @Binding var selection: Int?
+    @Binding var indexForDecision: Int?
     @Binding var gameState: GameState
     var doorIndex: Int
     var isContainPrize: Bool
@@ -63,7 +57,7 @@ struct DoorObject: View{
         
             Image(uiImage: UIImage(named: currentState == .closed ? "Closed Door.png" : "Opened Door.png")!)
                 .onChange(of: self.selection){_ in
-                    if self.selection != self.doorIndex && !self.isContainPrize{
+                    if self.indexForDecision! != self.doorIndex && !self.isContainPrize{
                         self.currentState = .opened
                     }
                 }
@@ -104,11 +98,17 @@ struct MainView: View{
                 ForEach(0..<game.numberOfDoor){ index in
                     VStack{
                         Text("Door \(index + 1)")
-                        DoorObject(selection: $game.selectedIndex, gameState: $game.gameState, doorIndex: index, isContainPrize: game.indexWithPrize == index)
+                        DoorObject(selection: $game.selectedIndex, indexForDecision: $game.indexForDecision, gameState: $game.gameState, doorIndex: index, isContainPrize: game.indexWithPrize == index)
                     }
                 }
             }
             Spacer()
+        }
+        .onChange(of: game.gameState){ _ in
+            if game.gameState == .decisioning{
+                game.selectIndexForDecision()
+                print("Index for decision: \(game.indexForDecision! + 1)")
+            }
         }
     }
 }
