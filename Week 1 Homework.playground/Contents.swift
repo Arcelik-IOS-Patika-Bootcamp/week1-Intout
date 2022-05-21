@@ -2,6 +2,7 @@ import SwiftUI
 import PlaygroundSupport
 import Foundation
 
+/// This class contains the game logic.
 class Game: ObservableObject{
     
     @Published var numberOfDoor: Int
@@ -18,6 +19,7 @@ class Game: ObservableObject{
         self.playerState = .notDetermined
     }
     
+    /// When user selects a door; if selected door contains the prize a random door will be selected and will be set for decision; if selected door not contains the prize, door that contains the prize will be set for decision.
     func selectIndexForDecision(){
         if self.selectedIndex == self.indexWithPrize{
             var indexForDecision: Int = Int.random(in: 0..<self.numberOfDoor)
@@ -31,6 +33,8 @@ class Game: ObservableObject{
         return
     }
     
+    /// All variable in this class will be reseted with this function.
+    /// - Parameter numberOfDoors: Number of door can be modified for the next game.
     func resetGame(numberOfDoors: Int){
         self.numberOfDoor = numberOfDoors
         self.indexWithPrize = Int.random(in: 0..<numberOfDoors)
@@ -72,7 +76,6 @@ struct DoorObject: View{
         
             Image(uiImage: UIImage(named: currentState == .closed ? "Closed Door.png" : "Opened Door.png")!)
                 .onChange(of: self.gameState){_ in
-                    
                     
                     switch (self.gameState){
                     case .begining:
@@ -175,6 +178,9 @@ struct MainView: View{
             }
         }
     }
+    /// Changes the highlight color of the given index depending on if the door contains prize or selected and game state.
+    /// - Parameter index: Index of the door in the array.
+    /// - Returns: Highlight color.
     func doorHighlightColor(index: Int) -> Color{
         switch (self.game.gameState){
         case .begining:
@@ -190,6 +196,9 @@ struct MainView: View{
         }
         return .white
     }
+    /// Determines if door should be highlighted depending on game state, if the door contains prize or if the door seleceted.
+    /// - Parameter index: Index of the door in the array.
+    /// - Returns: Opacity value between 0-1.
     func doorHighlight(index: Int) -> Double{
         switch (self.game.gameState){
         case .begining:
@@ -199,7 +208,7 @@ struct MainView: View{
                 return 1
             }
         case .ending:
-            if self.game.indexWithPrize == index || self.game.selectedIndex == index{
+            if self.game.indexWithPrize == index || self.game.selectedIndex == index{
                 return 1
             }
         }
@@ -207,13 +216,9 @@ struct MainView: View{
     }
 }
 
-
-
-
-
 PlaygroundPage.current.setLiveView(
     MainView()
-        .frame(width: 500, height: 400)
+        .frame(width: 500, height: 400, alignment: .center)
 )
 
 
